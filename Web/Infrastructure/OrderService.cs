@@ -16,7 +16,6 @@ namespace Web.Infrastructure
             var database = new Database();
 
             /////////////////////////////////New Way////////////////////////////////////
-            Dictionary<string, Boolean> companies = new Dictionary<string, bool>();
             List<Ledger> orderStatment = new List<Ledger>();
             var sql = "SELECT c.name, o.description, o.order_id, op.price, op.quantity, p.name FROM company c INNER JOIN[order] o on c.company_id = o.company_id Right Outer Join[orderproduct] op on o.order_id = op.order_id Inner Join[product] p on op.product_id = p.product_id";
             var reader = database.ExecuteReader(sql);
@@ -25,9 +24,10 @@ namespace Web.Infrastructure
             {
                 var record = (IDataRecord)reader;
                 var company = record.GetString(0).Trim();
-                if (!companies.ContainsKey(company))
+                var companyOrder = orderStatment.FirstOrDefault(f => f.CompanyName == company);
+                if (companyOrder == null)
                 {
-                    companies.Add(company, true);
+                  
                     var ledger = new Ledger
                     {
                         CompanyName = company,
@@ -49,9 +49,6 @@ namespace Web.Infrastructure
                 }
                 else
                 {
-                    var companyOrder = orderStatment.FirstOrDefault(f => f.CompanyName == company);
-                    if (companyOrder != null)
-                    {
                         companyOrder.Orders.Add(
                                     new OrderDetails
                                     {
@@ -65,7 +62,6 @@ namespace Web.Infrastructure
                             );
 
                         companyOrder.OrderTotal = companyOrder.Orders.Sum(f => f.ItemTotal);
-                    }
                 }
             }
             reader.Close();
