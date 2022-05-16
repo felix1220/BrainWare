@@ -10,76 +10,69 @@ namespace Web.Infrastructure
 
     public class OrderService
     {
-        public List<Order> GetOrdersForCompany(int CompanyId)
+        public List<Ledger> GetOrdersForCompany(int CompanyId)
         {
 
             var database = new Database();
 
-            // Get the orders
-            var sql1 =
-                "SELECT c.name, o.description, o.order_id FROM company c INNER JOIN [order] o on c.company_id=o.company_id";
+            /////////////////////////////////New Way////////////////////////////////////
+            Dictionary<string, Boolean> companies = new Dictionary<string, bool>();
+            List<Ledger> orderStatment = new List<Ledger>();
+            var sql = "SELECT c.name, o.description, o.order_id, op.price, op.quantity, p.name FROM company c INNER JOIN[order] o on c.company_id = o.company_id Right Outer Join[orderproduct] op on o.order_id = op.order_id Inner Join[product] p on op.product_id = p.product_id";
+            var reader = database.ExecuteReader(sql);
 
-            var reader1 = database.ExecuteReader(sql1);
-
-            var values = new List<Order>();
-            
-            while (reader1.Read())
+            while (reader.Read())
             {
-                var record1 = (IDataRecord) reader1;
-
-                values.Add(new Order()
+                var record = (IDataRecord)reader;
+                var company = record.GetString(0).Trim();
+                if (!companies.ContainsKey(company))
                 {
-                    CompanyName = record1.GetString(0),
-                    Description = record1.GetString(1),
-                    OrderId = record1.GetInt32(2),
-                    OrderProducts = new List<OrderProduct>()
-                });
-
-            }
-
-            reader1.Close();
-
-            //Get the order products
-            var sql2 =
-                "SELECT op.price, op.order_id, op.product_id, op.quantity, p.name, p.price FROM orderproduct op INNER JOIN product p on op.product_id=p.product_id";
-
-            var reader2 = database.ExecuteReader(sql2);
-
-            var values2 = new List<OrderProduct>();
-
-            while (reader2.Read())
-            {
-                var record2 = (IDataRecord)reader2;
-
-                values2.Add(new OrderProduct()
-                {
-                    OrderId = record2.GetInt32(1),
-                    ProductId = record2.GetInt32(2),
-                    Price = record2.GetDecimal(0),
-                    Quantity = record2.GetInt32(3),
-                    Product = new Product()
+                    companies.Add(company, true);
+                    var ledger = new Ledger
                     {
-                        Name = record2.GetString(4),
-                        Price = record2.GetDecimal(5)
-                    }
-                });
-             }
-
-            reader2.Close();
-
-            foreach (var order in values)
-            {
-                foreach (var orderproduct in values2)
+                        CompanyName = company,
+                        Orders = new List<OrderDetails>
+                            {
+                                 new OrderDetails
+                                    {
+                                        Description = record.GetString(1).Trim(),
+                                        OrderId = record.GetInt32(2),
+                                        Price = record.GetDecimal(3),
+                                        Quantity = record.GetInt32(4),
+                                        ProductName = record.GetString(5).Trim(),
+                                        ItemTotal = record.GetInt32(4) * record.GetDecimal(3)
+                                    }
+                            }
+                    };
+                    ledger.OrderTotal = ledger.Orders[0].ItemTotal;
+                    orderStatment.Add(ledger);
+                }
+                else
                 {
-                    if (orderproduct.OrderId != order.OrderId)
-                        continue;
+                    var companyOrder = orderStatment.FirstOrDefault(f => f.CompanyName == company);
+                    if (companyOrder != null)
+                    {
+                        companyOrder.Orders.Add(
+                                    new OrderDetails
+                                    {
+                                        Description = record.GetString(1).Trim(),
+                                        OrderId = record.GetInt32(2),
+                                        Price = record.GetDecimal(3),
+                                        Quantity = record.GetInt32(4),
+                                        ProductName = record.GetString(5).Trim(),
+                                        ItemTotal = record.GetInt32(4) * record.GetDecimal(3)
+                                    }
+                            );
 
-                    order.OrderProducts.Add(orderproduct);
-                    order.OrderTotal = order.OrderTotal + (orderproduct.Price * orderproduct.Quantity);
+                        companyOrder.OrderTotal = companyOrder.Orders.Sum(f => f.ItemTotal);
+                    }
                 }
             }
+            reader.Close();
+            database.CLoseConnection();
+            return orderStatment;
 
-            return values;
+
         }
     }
 }

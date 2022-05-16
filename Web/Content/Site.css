@@ -16,3 +16,27 @@ select,
 textarea {
     max-width: 280px;
 }
+.header {
+    display: flex;
+    flex-flow: row wrap;
+    width: 85%;
+    background-color: lightblue;
+    padding: 10px;
+}
+.data {
+    display: flex;
+    flex-flow: row wrap;
+    padding: 10px;
+    margin: 20px;
+    width: 85%;
+}
+.data-item {
+    width:17%;
+}
+.header-item {
+    width:17%;
+}
+.total-footer {
+    text-align:right;
+    width: 85%;
+}

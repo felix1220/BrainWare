@@ -29,7 +29,7 @@ namespace Web.Models
         public int ProductId { get; set; }
 
         public Product Product { get; set; }
-    
+
         public int Quantity { get; set; }
 
         public decimal Price { get; set; }
@@ -41,5 +41,25 @@ namespace Web.Models
         public string Name { get; set; }
 
         public decimal Price { get; set; }
+    }
+    public class OrderDetails {
+        public string Description { get; set; }
+        public decimal ItemTotal { get; set; }
+
+        public decimal Price { get; set; }
+
+        public int Quantity { get; set; }
+
+        public int OrderId { get; set; }
+
+        public string ProductName { get; set; }
+    }
+    public class Ledger
+    {
+        public string CompanyName { get; set; }
+
+        public List<OrderDetails> Orders { get; set; }
+
+        public decimal OrderTotal { get; set; }
     }
 }

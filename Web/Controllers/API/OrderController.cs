@@ -14,11 +14,21 @@ namespace Web.Controllers
     public class OrderController : ApiController
     {
         [HttpGet]
-        public IEnumerable<Order> GetOrders(int id = 1)
+        public object GetOrders(int id = 1)
         {
-            var data = new OrderService();
+            try
+            {
+                var data = new OrderService();
+               
+                return Json (new { Data = data.GetOrdersForCompany(id), Error= "" });
+            }
+            catch(Exception ex)
+            {
+                return Json(new { Data = new object(), Error = ex.ToString() });
+            }
+           
 
-            return data.GetOrdersForCompany(id);
+            
         }
     }
 }

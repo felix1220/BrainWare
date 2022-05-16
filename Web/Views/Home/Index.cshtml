@@ -2,12 +2,53 @@
     <h1>BrainWare Orders</h1>
     <p class="lead">This is the BrainWare orders page! Welcome</p>
 </div>
-<div class="row">
+<div class="container">
+  <div class="row">
     <div class="col-md-12">
         <h2>Your Orders</h2>
-        <div id="orders"></div>
+       <!-- <div id="orders"></div> -->
+        <div style="display:none" class="mt-4 row" id="data-panel">
+            <div class="col-12">
+                <div class="header mt-4 row">
+                    <div class="header-item col-3">
+                        Product Name
+                    </div>
+                    <div class="header-item col-3">
+                        Description
+                    </div>
+                    <div class="header-item col-2">
+                        Quantity
+                    </div>
+                    <div class="header-item col-2">
+                        Price
+                    </div>
+                    <div class="header-item col-2">
+                        Order Total
+                    </div>
+                </div>
+                <div style="margin-top:-20px">
+                    <div style="margin-left: -20px" id="dataLoad" class="col-12">
+
+                    </div>
+                </div>
+                <div class="total-footer">
+                    <span>
+                        <b>Total:</b>
+                    </span>
+                    <span id="total">
+
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div style="display:none" class="row" id="error-panel">
+            <div class="col-12">
+                <h2>There is an issue with the database at this time.</h2>
+            </div>
+        </div>
     </div>
   
+   </div>
 </div>
 <script>
     $(document).ready(function () {
@@ -18,24 +59,46 @@
             'success': function (data) {
 
                 var $orderList = $('<ul/>');
-
+               
                 if (data) {
-                    $.each(data,
-                        function(i) {
-                            var $li = $('<li/>').text(this.Description + ' (Total: $' + this.OrderTotal + ')')
-                                .appendTo($orderList);
+                    if (data.Error !== '') {
+                        $('#error-panel').show();
+                    }
+                    else {
+                        $('#data-panel').show();
+                        $.each(data.Data,
+                            function (i) {
 
-                            var $productList = $('<ul/>');
+                                $('#companyName').html('<b>' + this.CompanyName + '</b>');
+                                $data = $('#dataLoad');
 
-                            $.each(this.OrderProducts, function(j) {
-                                var $li2 = $('<li/>').text(this.Product.Name + ' ('+ this.Quantity +' @@ $' + this.Price + '/ea)')
-                                    .appendTo($productList);
+                                this.Orders.forEach(val => {
+
+                                    let $record = $('<div class="data row" />');
+                                    let $productName = $('<div class="data-item col-3" />');
+                                    let $description = $('<div class="data-item col-3" />');
+                                    let $quantity = $('<div class="data-item col-2" />');
+                                    let $price = $('<div class="data-item col-2" />');
+                                    let $itemTotal = $('<div class="data-item col-2" />');
+                                    $productName.html(val.ProductName);
+                                    $productName.appendTo($record);
+                                    $description.html(val.Description);
+                                    $description.appendTo($record);
+                                    $quantity.html(val.Quantity);
+                                    $quantity.appendTo($record);
+                                    $price.html('$' + val.Price);
+                                    $price.appendTo($record);
+                                    $itemTotal.html('$' + val.ItemTotal);
+                                    $itemTotal.appendTo($record);
+                                    $record.appendTo($data);
+
+                                });
+                                $('#total').html('$' + this.OrderTotal);
+
+
                             });
-
-                            $productList.appendTo($li);
-                        });
-
-                    $orders.append($orderList);
+                    }
+                  
                 }
             }
         });

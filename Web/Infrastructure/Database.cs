@@ -15,8 +15,8 @@ namespace Web.Infrastructure
         public Database()
         {
             // var connectionString = "Data Source=LOCALHOST;Initial Catalog=BrainWare;Integrated Security=SSPI";
-            var mdf = @"C:\Brainshark\interview\BrainWare\Web\App_Data\BrainWare.mdf";
-            var connectionString = $"Data Source=(LocalDb)\\MSSQLLocalDB;Initial Catalog=BrainWAre;Integrated Security=SSPI;AttachDBFilename={mdf}";
+            //var mdf = @"C:\Brainshark\interview\BrainWare\Web\App_Data\BrainWare.mdf";
+            var connectionString = $"Data Source=LT-3KKNXF2\\MSSQLSERVER01;Initial Catalog=BrainWAre;Integrated Security=SSPI;";
 
             _connection = new SqlConnection(connectionString);
 
@@ -38,6 +38,12 @@ namespace Web.Infrastructure
 
             return sqlQuery.ExecuteNonQuery();
         }
+
+        public void CLoseConnection()
+        {
+            _connection.Close();
+        }
+
 
     }
 }
